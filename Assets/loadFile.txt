@@ -1,0 +1,193 @@
+(Hey, Kid, what's your story?
+:0
+:1
+:2
+)What do you want?
+(Just trying to pass the time.
+:3
+:4
+:5
+-0,1
+)None of your business.
+(Alright, then. Mind if I tell you my story?
+:6
+:7
+:8
+-1,2
+)My family was killed by monsters. The Protectors took me in and have been training me to fight ever since.
+(That's rough, how do you feel about The Protectors?
+:9
+:10
+:11
+-2,3
+)Pass it another way.
+(Conversations about the only way in prison.
+:12
+:13
+:14
+-3,4 
+)Alright, my family was killed by monsters. The Protectors took me in and have been training me to fight ever since.
+(That's rough.
+:15
+:16
+:17
+-4,5
+)I don't feel like sharing.
+(Fair enough, want to hear my story?
+:18
+:19
+:20
+-5,6
+)Yes.
+(Whatever.
+-6,7
+)Screw off.
+(Whatever.
+-7,8
+)Sure, why not.
+(That's the spirit. I was born in Gorkaria, hated my family so I moved to Fordal to see the kings and castles and all those grand things. I realized I had a nack for creating armor designs and became a merchant selling my art. I travelled here to show off my skills to The Protectors and they arrested me for who knows what. And now I'm here.
+:21
+:22
+:23
+:24
+-8,9
+)They're mean and arrogant.
+(What if I told you we could free you?
+-9,10
+)They're the saviors that fight back the monsters.
+(Are they really?
+-10,11
+)Why?
+(Just making conversation.
+-11,12
+)I'm not in the mood for conversation.
+(Alright, then. Sorry for bothering you.
+-12,13
+)Screw off.
+(Whatever.
+-13,14
+)Fine, my family was killed by monsters. The Protectors took me in and have been training me ever since.
+(That's rough.
+:25
+:26
+:27
+-14,15
+)Yeah, what about you?
+(I was born in Gorkaria, hated my family so I moved to Fordal to see the kings and castles and all those grand things. I realized I had a nack for creating armor designs and became a merchant selling my art. I travelled here to show off my skills to The Protectors and they arrested me for who knows what. And now I'm here.
+:28
+:29
+:30
+:31
+-15,16
+)It's not the worst story I've heard.
+(Yes, the world sure is full of rough stories.
+:32
+:33
+-16,17
+)...
+(How do you feel about the protectors?
+:34
+:35
+:36
+-17,18
+)No.
+(Well alright then.
+-18,19
+)Screw off.
+(Whatever.
+-19,20
+)Sure, why not.
+(I was born in Gorkaria, hated my family so I moved to Fordal to see the kings and castles and all those grand things. I realized I had a nack for creating armor designs and became a merchant selling my art. I travelled here to show off my skills to The Protectors and they arrested me for who knows what. And now I'm here.
+:37
+:38
+:39
+:40
+-20,21
+)Interesting story.
+(Thank you. I wish it had more heroic deeds and life or death situations but I guess I just got lucky.
+:41
+-21,22
+)I almost fell asleep.
+(Well it certainly isn't the most action filled story... Still not interested in sharing?
+:42
+:43
+-22,23
+)You sell armor designs?
+(Best in the nation! See my shirt? I designed this. My friend here helps me show my work to anyone who will buy it. Kings and queens have worn my designs!
+:44
+:45
+-23,24
+)Why did you hate your parents?
+(They were a dull, unambitious couple. I admired them for their love for each other but not their willingness to sit and die. I wanted to see the world.
+:46
+:47
+-24,25
+)Yeah, what about you?
+(I was born in Gorkaria, hated my family so I moved to Fordal to see the kings and castles and all those grand things. I realized I had a nack for creating armor designs and became a merchant selling my art. I travelled here to show off my skills to The Protectors and they arrested me for who knows what. And now I'm here.
+-25,26
+)It's not the worst story I've heard.
+(Yes, the world sure is full of rough stories.
+-26,27
+)...
+(How do you feel about the protectors?
+-27,28
+)Interesting story.
+(Thank you. I wish it had more heroic deeds and life or death situations but I guess I just got lucky.
+-28,29
+)I almost fell asleep.
+(Well it certainly isn't the most action filled story...
+-29,30
+)You sell armor designs?
+(Best in the nation! See my shirt? I designed this. My friend here helps me show my work to anyone who will buy it. Kings and queens have worn my designs!
+-30,31
+)Why did you hate your parents?
+(They were a dull, unambitious couple. I admired them for their love for each other but not their willingness to sit and die. I wanted to see the world.
+-31,32
+)What about yours?
+(I was born in Gorkaria, hated my family so I moved to Fordal to see the kings and castles and all those grand things. I realized I had a nack for creating armor designs and became a merchant selling my art. I travelled here to show off my skills to The Protectors and they arrested me for who knows what. And now I'm here.
+-32,33
+)Is that why you came to The Protectors?
+(Gods no. The Protectors can't protect anyone. They can only protect themselves. That's the only reason they build this place. They say they want to help people but yet they sit in their castle with all the poor orphans they captured and train them until their dieing breath to keep them safe from the world.
+-33,34
+)Why do you want to know?
+(Just making conversation.
+-34,35
+)I think they're mean and arrogant.
+(We are a lot alike you know. What if I told you we could free you from them.
+-35,36
+)They protect people from the monsters.
+(Do they really? Have you ever seen them manage to save anyone?
+-36,37
+)Interesting story.
+(Thank you. I wish it had more heroic deeds and life or death situations but I guess I just got lucky.
+-37,38
+)I almost fell asleep.
+(Well it certainly isn't the most action filled story...
+-38,39
+)You sell armor designs?
+(Best in the nation! See my shirt? I designed this. My friend here helps me show my work to anyone who will buy it. Kings and queens have worn my designs!
+-39,40
+)Why did you hate your parents?
+(They were a dull, unambitious couple. I admired them for their love for each other but not their willingness to sit and die. I wanted to see the world.
+-40,41
+)You did get lucky.
+(Yeah. Still not interested in sharing?
+-41,42
+)Yes.
+(Alright, then.
+-42,43
+)Fine, my family was killed by monsters. The Protectors took me in and have been training me to fight ever since.
+(That's rough.
+-43,44
+)What's Fordal like?
+(It was as magnificent as I had imagined! The colors were about as equally dull but the size of the structures and castles was breathtaking.
+-44,45
+)What was Gorkaria like?
+(It's an overpopulated mud pile. Mud rain and people everywhere you turn.
+-45,46
+)What's Fordal like?
+(It was as magnificent as I had imagined! The colors were about as equally dull but the size of the structures and castles was breathtaking.
+-46,47
+)What was Gorkaria like?
+(It's an overpopulated mud pile. Mud rain and people everywhere you turn.
+-47,48
