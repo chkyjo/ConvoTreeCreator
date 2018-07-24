@@ -13,19 +13,17 @@ public class SaveManager : MonoBehaviour {
     public GameObject level;
     public GameObject leafNode;
 
-    public struct CharacterResponse {
-        public int responseID;
-        public string response;
+    public struct ConvoNode {
+        public int nodeID;
+        public string playerResponse;
+        public string responseSummary;
+        public string characterResponse;
         public int[] playerOptions;
-    }
-    public struct PlayerResponse {
-        public int responseID;
-        public string response;
-        public int characterResponseID;
+        public int effect;
+        public int parameter1;
     }
 
-    CharacterResponse[] characterResponses = new CharacterResponse[100];
-    PlayerResponse[] playerResponses = new PlayerResponse[100];
+    ConvoNode[] convoNodes = new ConvoNode[100];
 
     public void SaveConversation() {
         StreamWriter file = new StreamWriter(Application.persistentDataPath + "/" + saveTextFile.GetComponent<InputField>().text, true);
@@ -36,8 +34,8 @@ public class SaveManager : MonoBehaviour {
                 file.WriteLine(treePanel.transform.GetChild(0).GetChild(0).GetComponent<InputField>().text);
                 //if root has children print them
                 if(treePanel.transform.GetChild(0).GetComponent<NodeUpdater>().childrenGroup != null) {
-                    for (int n = 0; n < treePanel.transform.GetChild(0).GetComponent<NodeUpdater>().childrenGroup.transform.childCount; n++) {
-                        file.WriteLine(":" + treePanel.transform.GetChild(0).GetComponent<NodeUpdater>().childrenGroup.transform.GetChild(n).GetChild(2).GetComponent<InputField>().text);
+                    for (int n = 1; n < treePanel.transform.GetChild(0).GetComponent<NodeUpdater>().childrenGroup.transform.childCount; n++) {
+                        file.WriteLine(":" + treePanel.transform.GetChild(0).GetComponent<NodeUpdater>().childrenGroup.transform.GetChild(n).GetChild(3).GetComponent<InputField>().text);
                     }
                 }
             }
@@ -45,12 +43,25 @@ public class SaveManager : MonoBehaviour {
                 //for every group in the current level
                 for(int j = 0; j < treePanel.transform.GetChild(i).childCount; j++) {
                     //for every leaf in the current group
-                    for(int k = 0; k < treePanel.transform.GetChild(i).GetChild(j).childCount; k++) {
+                    for(int k = 1; k < treePanel.transform.GetChild(i).GetChild(j).childCount; k++) {
                         GameObject node = treePanel.transform.GetChild(i).GetChild(j).GetChild(k).gameObject;
+                        //description of player response
+                        file.WriteLine("/" + node.transform.GetChild(0).GetComponent<InputField>().text);
                         //player response
-                        file.WriteLine(")" + node.transform.GetChild(0).GetComponent<InputField>().text);
+                        file.WriteLine(")" + node.transform.GetChild(1).GetComponent<InputField>().text);
                         //character response
-                        file.WriteLine("(" + node.transform.GetChild(1).GetComponent<InputField>().text);
+                        file.WriteLine("(" + node.transform.GetChild(2).GetComponent<InputField>().text);
+                        
+
+                        if(node.transform.GetChild(6).GetComponent<InputField>().text != "0") {
+                            //effect of speech + parameter if there is one
+                            file.WriteLine(">" + node.transform.GetChild(5).GetComponent<Dropdown>().value + "-" + node.transform.GetChild(6).GetComponent<InputField>().text);
+                        }
+                        else {
+                            //effect of speech
+                            file.WriteLine(">" + node.transform.GetChild(5).GetComponent<Dropdown>().value);
+                        }
+                        
                         //display child indexes if there are any
                         if (node.GetComponent<NodeUpdater>().childrenGroup != null) {
                             Debug.Log("Children group for child " + k + " in group " + j + " and level " + i + " is not null");
@@ -59,7 +70,7 @@ public class SaveManager : MonoBehaviour {
                             }
                         }
                         //response IDs
-                        file.WriteLine("-" + node.transform.GetChild(2).GetComponent<InputField>().text + "," + node.transform.GetChild(3).GetComponent<InputField>().text);
+                        file.WriteLine("-" + node.transform.GetChild(3).GetComponent<InputField>().text);
                     }
                 }
             }
@@ -71,8 +82,7 @@ public class SaveManager : MonoBehaviour {
     public void LoadConversation() {
         StreamReader file = new StreamReader(Application.persistentDataPath + "/" + textFileField.GetComponent<InputField>().text, true);
 
-        int characterResponseIndex = 0;
-        int playerResponseIndex = 0;
+        int nodeIndex = 0;
 
         int numChildren = 0;
         int[] childIndexes = new int[5];
@@ -80,8 +90,8 @@ public class SaveManager : MonoBehaviour {
 
         //get root data
         string rootString = file.ReadLine();
-        characterResponses[0].responseID = 0;
-        characterResponses[0].response = rootString.TrimStart('(');
+        convoNodes[0].nodeID = 0;
+        convoNodes[0].characterResponse = rootString.TrimStart('(');
 
         while (!file.EndOfStream) {
             nextLine = file.ReadLine();
@@ -90,77 +100,108 @@ public class SaveManager : MonoBehaviour {
                 numChildren++;
             }
             else if (numChildren != 0) {//if not a child index and numchildren is not 0 add children to character response
-                characterResponses[characterResponseIndex].playerOptions = new int[numChildren];
+                convoNodes[nodeIndex].playerOptions = new int[numChildren];
                 for(int i = 0; i < numChildren; i++) {
-                    characterResponses[characterResponseIndex].playerOptions[i] = childIndexes[i];
+                    convoNodes[nodeIndex].playerOptions[i] = childIndexes[i];
                 }
-                if (characterResponseIndex == 0) {//if root also up the index
-                    characterResponseIndex++;
+                if (nodeIndex == 0) {//if root also up the index
+                    nodeIndex++;
                 }
                 numChildren = 0;
             }
 
+            if (nextLine.StartsWith("/")) {//if summary add string
+                convoNodes[nodeIndex].responseSummary = nextLine.TrimStart('/');
+            }
+
             if (nextLine.StartsWith(")")) {//if player response add the string
-                playerResponses[playerResponseIndex].response = nextLine.TrimStart(')');
+                convoNodes[nodeIndex].playerResponse = nextLine.TrimStart(')');
             }
 
             if (nextLine.StartsWith("(")) {//if character response add the string
-                characterResponses[characterResponseIndex].response = nextLine.TrimStart('(');
+                convoNodes[nodeIndex].characterResponse = nextLine.TrimStart('(');
             }
 
-            if (nextLine.StartsWith("-")) {//if IDs add Ids and up index for both
-                string[] splitByComma = nextLine.TrimStart('-').Split(',');
-                playerResponses[playerResponseIndex].responseID = Convert.ToInt16(splitByComma[0]);
-                playerResponses[playerResponseIndex].characterResponseID = playerResponses[playerResponseIndex].responseID + 1;
-                characterResponses[characterResponseIndex].responseID = Convert.ToInt16(splitByComma[1]);
+            if (nextLine.StartsWith(">")) {//if effect index
+                string[] splitEffect;
+                splitEffect = nextLine.TrimStart('>').Split('-');
+                if(splitEffect.Length == 2) {
+                    convoNodes[nodeIndex].effect = Convert.ToInt16(splitEffect[0]);
+                    convoNodes[nodeIndex].parameter1 = Convert.ToInt16(splitEffect[1]);
+                }
+                else {
+                    convoNodes[nodeIndex].effect = Convert.ToInt16(splitEffect[0]);
+                    convoNodes[nodeIndex].parameter1 = 0;
+                }
+            }
 
-                playerResponseIndex++;
-                characterResponseIndex++;
+            if (nextLine.StartsWith("-")) {
+                convoNodes[nodeIndex].nodeID = Convert.ToInt16(nextLine.TrimStart('-'));
+
+                nodeIndex++;
             }
         }
     }
 
     public void DisplayTree() {
 
-        root.transform.GetChild(0).GetComponent<InputField>().text = characterResponses[0].response;
-        int numRootChildren = characterResponses[0].playerOptions.Length;
+        root.transform.GetChild(0).GetComponent<InputField>().text = convoNodes[0].characterResponse;
+        int numRootChildren = convoNodes[0].playerOptions.Length;
         root.transform.GetChild(2).GetComponent<Slider>().value = numRootChildren;
         bool hasChildren;
 
         if (numRootChildren > 0) {
             hasChildren = true;
-            for (int i = 0; i < numRootChildren; i++) {
+            for (int i = 1; i <= numRootChildren; i++) {
                 GameObject node = treePanel.transform.GetChild(1).GetChild(0).GetChild(i).gameObject;
-                node.transform.GetChild(0).GetComponent<InputField>().text = playerResponses[characterResponses[0].playerOptions[i]].response;
-                node.transform.GetChild(2).GetComponent<InputField>().text = playerResponses[characterResponses[0].playerOptions[i]].responseID.ToString();
+                ConvoNode convoNode = convoNodes[convoNodes[0].playerOptions[i-1]];
+                node.transform.GetChild(0).GetComponent<InputField>().text = convoNode.responseSummary;
+                node.transform.GetChild(1).GetComponent<InputField>().text = convoNode.playerResponse;
+                node.transform.GetChild(2).GetComponent<InputField>().text = convoNode.characterResponse;
+                node.transform.GetChild(3).GetComponent<InputField>().text = convoNode.nodeID.ToString();
+                if(convoNode.playerOptions != null) {
+                    node.transform.GetChild(4).GetComponent<Slider>().value = convoNode.playerOptions.Length;
+                }
+                node.transform.GetChild(5).GetComponent<Dropdown>().value = convoNode.effect;
+                node.transform.GetChild(6).GetComponent<InputField>().text = convoNode.parameter1.ToString();
             }
         }
         else {
             hasChildren = true;
         }
 
-        int characterResponseIndex = 1;
+        int nodeIndex = 1;
         int levelIndex = 1;
 
         while (hasChildren == true) {
             //for every group in current level
-            for (int i = 0; i < treePanel.transform.GetChild(levelIndex).childCount; i++) {
-                //for ever leaf in group
-                for (int j = 0; j < treePanel.transform.GetChild(levelIndex).GetChild(i).childCount; j++) {
-                    GameObject currentNode = treePanel.transform.GetChild(levelIndex).GetChild(i).GetChild(j).gameObject;
-                    currentNode.transform.GetChild(1).GetComponent<InputField>().text = characterResponses[characterResponseIndex].response;
-                    currentNode.transform.GetChild(3).GetComponent<InputField>().text = characterResponses[characterResponseIndex].responseID.ToString();
-                    if(characterResponses[characterResponseIndex].playerOptions != null) {
-                        currentNode.transform.GetChild(4).GetComponent<Slider>().value = characterResponses[characterResponseIndex].playerOptions.Length;
-                    }        
-
-                    if (currentNode.transform.GetChild(4).GetComponent<Slider>().value != 0) {
-                        for (int n = 0; n < currentNode.transform.GetChild(4).GetComponent<Slider>().value; n++) {
-                            currentNode.GetComponent<NodeUpdater>().childrenGroup.transform.GetChild(n).GetChild(0).GetComponent<InputField>().text = playerResponses[characterResponses[characterResponseIndex].playerOptions[n]].response;
-                            currentNode.GetComponent<NodeUpdater>().childrenGroup.transform.GetChild(n).GetChild(2).GetComponent<InputField>().text = playerResponses[characterResponses[characterResponseIndex].playerOptions[n]].responseID.ToString();
+            for (int group = 0; group < treePanel.transform.GetChild(levelIndex).childCount; group++) {
+                //for every leaf in group
+                for (int leaf = 1; leaf < treePanel.transform.GetChild(levelIndex).GetChild(group).childCount; leaf++) {
+                    //instantiate children if it has any
+                    Debug.Log("Leaf index: " + leaf);
+                    if (treePanel.transform.GetChild(levelIndex).GetChild(group).GetChild(leaf).GetComponent<NodeUpdater>().childrenGroup != null) {
+                        GameObject childrenGroup = treePanel.transform.GetChild(levelIndex).GetChild(group).GetChild(leaf).GetComponent<NodeUpdater>().childrenGroup;
+                        GameObject currentChild;
+                        Debug.Log("NodeIndex: " + nodeIndex);
+                        //for every child
+                        for (int child = 1; child < convoNodes[nodeIndex].playerOptions.Length; child++) {
+                            currentChild = childrenGroup.transform.GetChild(child).gameObject;
+                            ConvoNode convoNode = convoNodes[convoNodes[nodeIndex].playerOptions[child - 1]];
+                            
+                            currentChild.transform.GetChild(0).GetComponent<InputField>().text = convoNode.responseSummary;
+                            currentChild.transform.GetChild(1).GetComponent<InputField>().text = convoNode.playerResponse;
+                            currentChild.transform.GetChild(2).GetComponent<InputField>().text = convoNode.characterResponse;
+                            currentChild.transform.GetChild(3).GetComponent<InputField>().text = convoNode.nodeID.ToString();
+                            if(convoNode.playerOptions != null) {
+                                currentChild.transform.GetChild(4).GetComponent<Slider>().value = convoNode.playerOptions.Length;
+                            }
+                            currentChild.transform.GetChild(5).GetComponent<Dropdown>().value = convoNode.effect;
+                            currentChild.transform.GetChild(6).GetComponent<InputField>().text = convoNode.parameter1.ToString();
+                            Debug.Log(child);
                         }
                     }
-                    characterResponseIndex++;
+                    nodeIndex++;
                 }
             }
             
