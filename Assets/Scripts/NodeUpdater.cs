@@ -8,6 +8,7 @@ public class NodeUpdater : MonoBehaviour {
     public Color childrenColor;
     public Slider childrenSlider;
     public GameObject childrenGroup;
+    public int groupID;
     public Dropdown actionDropDown;
 
     int actionValue;
@@ -26,5 +27,8 @@ public class NodeUpdater : MonoBehaviour {
         return actionValue;
     }
 
+    public void SetAsNodeToLink() {
+        GameObject.Find("ChildrenManager").GetComponent<ChildrenManager>().nodeToLink = gameObject;
+    }
 
 }

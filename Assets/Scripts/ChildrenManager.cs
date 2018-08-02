@@ -7,6 +7,8 @@ public class ChildrenManager : MonoBehaviour {
     public GameObject horizontalPanel;
     public GameObject treeNode;
     public GameObject levelPanel;
+    public GameObject nodeToLink;
+    public GameObject groupPanelToLink;
 
     Vector2 offset = new Vector2(1, 0);
 
@@ -15,6 +17,9 @@ public class ChildrenManager : MonoBehaviour {
         if (numChildren == 0) {
             //destroy group
             Destroy(parent.GetComponent<NodeUpdater>().childrenGroup);
+            if(treePanel.transform.GetChild(parentLevel + 1).childCount < 1) {
+                Destroy(treePanel.transform.GetChild(parentLevel + 1).gameObject);
+            }
         }
         else {
             //if child count of the treePanel is equal to the level of the node calling the function
@@ -60,20 +65,31 @@ public class ChildrenManager : MonoBehaviour {
 
     public void AssignIDs() {
 
-        int ID = 1;
+        int nodeID = 1;
+        int groupID = 0;
 
         for (int i = 1; i < treePanel.transform.childCount; i++) {
             
             //for every group in the current level
             for (int j = 0; j < treePanel.transform.GetChild(i).childCount; j++) {
+                treePanel.transform.GetChild(i).GetChild(j).GetComponent<HorizontalTracker>().groupID = groupID;
+                treePanel.transform.GetChild(i).GetChild(j).GetChild(0).GetChild(2).GetComponent<Text>().text = groupID.ToString();
+                groupID++;
                 //for every leaf in the current group
                 for (int k = 1; k < treePanel.transform.GetChild(i).GetChild(j).childCount; k++) {
-                    treePanel.transform.GetChild(i).GetChild(j).GetChild(k).GetChild(3).GetComponent<InputField>().text = ID.ToString();
-                    ID++;
+                    treePanel.transform.GetChild(i).GetChild(j).GetChild(k).GetChild(3).GetComponent<InputField>().text = nodeID.ToString();
+                    nodeID++;
                 }
             }
-            
         }
+    }
+
+    public void SetGroup() {
+        nodeToLink.GetComponent<NodeUpdater>().childrenGroup = groupPanelToLink;
+        nodeToLink.transform.GetChild(4).GetComponent<Slider>().value = groupPanelToLink.transform.childCount - 1;
+        nodeToLink.GetComponent<Image>().color = groupPanelToLink.GetComponent<Image>().color;
+        nodeToLink.GetComponent<NodeUpdater>().groupID = groupPanelToLink.GetComponent<HorizontalTracker>().groupID;
+        
     }
 
 }

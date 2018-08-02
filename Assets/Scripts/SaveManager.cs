@@ -18,6 +18,7 @@ public class SaveManager : MonoBehaviour {
         public string playerResponse;
         public string responseSummary;
         public string characterResponse;
+        public int childrenGroupID;
         public int[] playerOptions;
         public int effect;
         public int parameter1;
@@ -51,7 +52,6 @@ public class SaveManager : MonoBehaviour {
                         file.WriteLine(")" + node.transform.GetChild(1).GetComponent<InputField>().text);
                         //character response
                         file.WriteLine("(" + node.transform.GetChild(2).GetComponent<InputField>().text);
-                        
 
                         if(node.transform.GetChild(6).GetComponent<InputField>().text != "0") {
                             //effect of speech + parameter if there is one
@@ -64,9 +64,9 @@ public class SaveManager : MonoBehaviour {
                         
                         //display child indexes if there are any
                         if (node.GetComponent<NodeUpdater>().childrenGroup != null) {
-                            Debug.Log("Children group for child " + k + " in group " + j + " and level " + i + " is not null");
-                            for (int n = 0; n < node.GetComponent<NodeUpdater>().childrenGroup.transform.childCount; n++) {
-                                file.WriteLine(":" + node.GetComponent<NodeUpdater>().childrenGroup.transform.GetChild(n).GetChild(2).GetComponent<InputField>().text);
+                            file.WriteLine("}" + node.GetComponent<NodeUpdater>().childrenGroup.GetComponent<HorizontalTracker>().groupID);
+                            for (int n = 1; n < node.GetComponent<NodeUpdater>().childrenGroup.transform.childCount; n++) {
+                                file.WriteLine(":" + node.GetComponent<NodeUpdater>().childrenGroup.transform.GetChild(n).GetChild(3).GetComponent<InputField>().text);
                             }
                         }
                         //response IDs
@@ -89,14 +89,13 @@ public class SaveManager : MonoBehaviour {
         string nextLine;
 
         //get root data
-        string rootString = file.ReadLine();
         convoNodes[0].nodeID = 0;
-        convoNodes[0].characterResponse = rootString.TrimStart('(');
+        convoNodes[0].characterResponse = file.ReadLine();
 
         while (!file.EndOfStream) {
             nextLine = file.ReadLine();
             if (nextLine.StartsWith(":")) {//if child index add to child indexes
-                childIndexes[numChildren] = Convert.ToInt16(nextLine.TrimStart(':'));
+                childIndexes[numChildren] = Convert.ToInt32(nextLine.TrimStart(':'));
                 numChildren++;
             }
             else if (numChildren != 0) {//if not a child index and numchildren is not 0 add children to character response
@@ -104,7 +103,7 @@ public class SaveManager : MonoBehaviour {
                 for(int i = 0; i < numChildren; i++) {
                     convoNodes[nodeIndex].playerOptions[i] = childIndexes[i];
                 }
-                if (nodeIndex == 0) {//if root also up the index
+                if (nodeIndex == 0) {//if root also add to the index
                     nodeIndex++;
                 }
                 numChildren = 0;
@@ -135,6 +134,10 @@ public class SaveManager : MonoBehaviour {
                 }
             }
 
+            if (nextLine.StartsWith("}")) {//if children group ID
+                convoNodes[nodeIndex].childrenGroupID = Convert.ToInt16(nextLine.TrimStart('}'));
+            }
+
             if (nextLine.StartsWith("-")) {
                 convoNodes[nodeIndex].nodeID = Convert.ToInt16(nextLine.TrimStart('-'));
 
@@ -159,9 +162,18 @@ public class SaveManager : MonoBehaviour {
                 node.transform.GetChild(1).GetComponent<InputField>().text = convoNode.playerResponse;
                 node.transform.GetChild(2).GetComponent<InputField>().text = convoNode.characterResponse;
                 node.transform.GetChild(3).GetComponent<InputField>().text = convoNode.nodeID.ToString();
-                if(convoNode.playerOptions != null) {
-                    node.transform.GetChild(4).GetComponent<Slider>().value = convoNode.playerOptions.Length;
+                
+                if (convoNode.playerOptions != null) {
+                    //if we don't link to an already existing node
+                    if (!LinkNodeToGroup(node, convoNode.childrenGroupID)) {
+                        //create new group with empty children
+                        node.transform.GetChild(4).GetComponent<Slider>().value = convoNode.playerOptions.Length;
+                        //assign groupID
+                        node.GetComponent<NodeUpdater>().childrenGroup.GetComponent<HorizontalTracker>().groupID = convoNode.childrenGroupID;
+
+                    }
                 }
+                
                 node.transform.GetChild(5).GetComponent<Dropdown>().value = convoNode.effect;
                 node.transform.GetChild(6).GetComponent<InputField>().text = convoNode.parameter1.ToString();
             }
@@ -179,26 +191,29 @@ public class SaveManager : MonoBehaviour {
                 //for every leaf in group
                 for (int leaf = 1; leaf < treePanel.transform.GetChild(levelIndex).GetChild(group).childCount; leaf++) {
                     //instantiate children if it has any
-                    Debug.Log("Leaf index: " + leaf);
                     if (treePanel.transform.GetChild(levelIndex).GetChild(group).GetChild(leaf).GetComponent<NodeUpdater>().childrenGroup != null) {
                         GameObject childrenGroup = treePanel.transform.GetChild(levelIndex).GetChild(group).GetChild(leaf).GetComponent<NodeUpdater>().childrenGroup;
                         GameObject currentChild;
-                        Debug.Log("NodeIndex: " + nodeIndex);
                         //for every child
-                        for (int child = 1; child < convoNodes[nodeIndex].playerOptions.Length; child++) {
-                            currentChild = childrenGroup.transform.GetChild(child).gameObject;
-                            ConvoNode convoNode = convoNodes[convoNodes[nodeIndex].playerOptions[child - 1]];
+                        for (int child = 0; child < convoNodes[nodeIndex].playerOptions.Length; child++) {
+                            currentChild = childrenGroup.transform.GetChild(child + 1).gameObject;
+                            ConvoNode convoNode = convoNodes[convoNodes[nodeIndex].playerOptions[child]];
                             
                             currentChild.transform.GetChild(0).GetComponent<InputField>().text = convoNode.responseSummary;
                             currentChild.transform.GetChild(1).GetComponent<InputField>().text = convoNode.playerResponse;
                             currentChild.transform.GetChild(2).GetComponent<InputField>().text = convoNode.characterResponse;
                             currentChild.transform.GetChild(3).GetComponent<InputField>().text = convoNode.nodeID.ToString();
-                            if(convoNode.playerOptions != null) {
-                                currentChild.transform.GetChild(4).GetComponent<Slider>().value = convoNode.playerOptions.Length;
+                            if (convoNode.playerOptions != null) {
+                                //if we don't link to an already existing node
+                                if (!LinkNodeToGroup(currentChild, convoNode.childrenGroupID)) {
+                                    //create empty children
+                                    currentChild.transform.GetChild(4).GetComponent<Slider>().value = convoNode.playerOptions.Length;
+                                    //assign groupID
+                                    currentChild.GetComponent<NodeUpdater>().childrenGroup.GetComponent<HorizontalTracker>().groupID = convoNode.childrenGroupID;
+                                }
                             }
                             currentChild.transform.GetChild(5).GetComponent<Dropdown>().value = convoNode.effect;
                             currentChild.transform.GetChild(6).GetComponent<InputField>().text = convoNode.parameter1.ToString();
-                            Debug.Log(child);
                         }
                     }
                     nodeIndex++;
@@ -211,5 +226,27 @@ public class SaveManager : MonoBehaviour {
             levelIndex++;
         }
 
+    }
+
+    public bool LinkNodeToGroup(GameObject node, int groupID) {
+
+
+        Debug.Log("Attempting to link group " + group.GetComponent<HorizontalTracker>().groupID);
+
+        for(int i = 1; i < treePanel.transform.childCount; i++) {
+            for(int j = 0; j < treePanel.transform.GetChild(i).childCount; j++) {
+                if(treePanel.transform.GetChild(i).GetChild(j).GetComponent<HorizontalTracker>().groupID == groupID) {
+                    GameObject group = treePanel.transform.GetChild(i).GetChild(j).gameObject;
+                    node.GetComponent<NodeUpdater>().childrenGroup = group;
+                    node.transform.GetChild(4).GetComponent<Slider>().value = group.transform.childCount - 1;
+                    node.GetComponent<Image>().color = group.GetComponent<Image>().color;
+                    node.GetComponent<NodeUpdater>().groupID = group.GetComponent<HorizontalTracker>().groupID;
+                    Debug.Log("Linked");
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
