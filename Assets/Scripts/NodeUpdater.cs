@@ -14,9 +14,7 @@ public class NodeUpdater : MonoBehaviour {
     int actionValue;
 
     public void SendValueToManager() {
-        int numChildren = (int)childrenSlider.value;
-
-        GameObject.Find("ChildrenManager").GetComponent<ChildrenManager>().UpdateChildren(level, numChildren, gameObject);
+        GameObject.Find("ChildrenManager").GetComponent<ChildrenManager>().UpdateChildren(level, gameObject);
     }
 
     public void SaveActionValue() {
@@ -27,8 +25,28 @@ public class NodeUpdater : MonoBehaviour {
         return actionValue;
     }
 
+    public void SetSelfAsParent() {
+        childrenGroup.GetComponent<HorizontalTracker>().AddParent(this);
+    }
+
+    //Called when the user clicks the link button. Sets the node as the current node to 
+    //link to the next node the user hits the link button on
     public void SetAsNodeToLink() {
-        GameObject.Find("ChildrenManager").GetComponent<ChildrenManager>().nodeToLink = gameObject;
+        ChildrenManager cM = GameObject.Find("ChildrenManager").GetComponent<ChildrenManager>();
+        if (cM.nodeToLink != null) {
+            if(cM.nodeToLink == gameObject) {
+                cM.nodeToLink = null;
+                cM.EnableAllLinkButtons();
+                cM.DisableGroupLinkButtons();
+                return;
+            }
+        }
+        cM.nodeToLink = gameObject;
+        //set all other link buttons to not be interactable
+        cM.DisableAllLinkButtons();
+        //set this button to be interactable to cancel the action
+        transform.GetChild(7).GetComponent<Button>().interactable = true;
+        cM.EnableGroupLinkButtons();
     }
 
 }

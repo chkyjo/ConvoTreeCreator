@@ -1,9 +1,19 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class HorizontalTracker : MonoBehaviour {
 
-    public int parentID;
+    public List<NodeUpdater> parents;
+    public GameObject level;
     public int groupID;
+
+    void Awake() {
+        parents = new List<NodeUpdater>();
+    }
+
+    void Start() {
+        
+    }
 
     public void Minimize() {
         int numChildren = transform.childCount;
@@ -23,8 +33,20 @@ public class HorizontalTracker : MonoBehaviour {
         }
     }
 
+    public void AddParent(NodeUpdater node) {
+        Debug.Log("Adding parent");
+        parents.Add(node);
+    }
+
+    public void RemoveParent(NodeUpdater node) {
+        Debug.Log("Removing parent");
+        parents.Remove(node);
+    }
+
     public void SetAsGroupToLink() {
-        GameObject.Find("ChildrenManager").GetComponent<ChildrenManager>().groupPanelToLink = gameObject;
-        GameObject.Find("ChildrenManager").GetComponent<ChildrenManager>().SetGroup();
+        ChildrenManager cM = GameObject.Find("ChildrenManager").GetComponent<ChildrenManager>();
+        cM.EnableAllLinkButtons();
+        cM.SetGroup(gameObject);
+        cM.DisableGroupLinkButtons();
     }
 }
